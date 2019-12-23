@@ -32,6 +32,16 @@ android {
                 file("proguard-rules.pro")
             )
         }
+
+    }
+    applicationVariants.forEach { variant ->
+        println("variant : ${variant.name}")
+        variant.outputs.forEach { variantOutput ->
+            (variantOutput as com.android.build.gradle.internal.api.BaseVariantOutputImpl).apply {
+                outputFileName =
+                    "$outputFileName-${variant.buildType}-${variant.flavorName}-${variant.versionName}.apk"
+            }
+        }
     }
 
 }
