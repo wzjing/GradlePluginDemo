@@ -3,7 +3,11 @@ plugins {
     kotlin("android")
     kotlin("android.extensions")
     kotlin("kapt")
-    id()
+    id("com.wzjing.preconfig")
+}
+
+preconfig {
+    configFile.set(rootProject.file("flavors/me.yidui/config.json"))
 }
 
 android {
