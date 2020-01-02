@@ -20,6 +20,7 @@ android {
         targetSdkVersion(29)
         versionCode = 1
         versionName = "1.0"
+        versionNameSuffix = FlavorConfig.codeTag
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -34,13 +35,19 @@ android {
         }
 
     }
-    applicationVariants.forEach { variant ->
-        println("variant : ${variant.name}")
-        variant.outputs.forEach { variantOutput ->
-            (variantOutput as com.android.build.gradle.internal.api.BaseVariantOutputImpl).apply {
-                outputFileName =
-                    "$outputFileName-${variant.buildType}-${variant.flavorName}-${variant.versionName}.apk"
-            }
+
+    flavorDimensions("usage")
+
+    productFlavors {
+        create("dev") {
+            versionCode = 999
+            versionName = "9.9.9"
+        }
+
+        create("canary") {
+        }
+
+        create("publish") {
         }
     }
 

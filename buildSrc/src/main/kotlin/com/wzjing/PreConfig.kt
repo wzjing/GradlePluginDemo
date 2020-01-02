@@ -132,15 +132,26 @@ class PreConfigPlugin : Plugin<Project> {
 
             buildTypes {
                 getByName("debug") {
-                    applicationVariants.forEach {variant ->
-                        variant.outputs.forEach { variantOutput ->
-                            (variantOutput as BaseVariantOutputImpl).apply {
-                                outputFileName = "$outputFileName-${variant.buildType}-${variant.flavorName}-${variant.versionName}.apk"
+                    println("$TAG : variants count ${applicationVariants.size}")
+                    applicationVariants.all {
+                        val variant = this
+                        variant.outputs.all {
+                            val output = this
+                            (output as BaseVariantOutputImpl).apply {
+
+                                println("""
+                                    buildType: ${variant.buildType.name}
+                                    flavorName: ${variant.flavorName}
+                                    versionName: ${variant.versionName}
+                                """.trimIndent())
+                                val apkName =
+                                    "$outputFileName-${variant.buildType}-${variant.flavorName}-${variant.versionName}.apk"
+                                println("$TAG : setting apk name to $apkName")
+                                outputFileName = apkName
+
                             }
                         }
                     }
-
-                    println("$TAG : apply to buildType debug")
                 }
             }
         }
