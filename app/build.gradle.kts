@@ -11,6 +11,22 @@ preconfig {
 }
 
 android {
+    signingConfigs {
+        getByName("debug") {
+            storeFile =
+                file("/Users/wangzijing/StudioProjects/samples/GradlePluginDemo/app/test.keystore")
+            storePassword = "123456"
+            keyAlias = "test"
+            keyPassword = "123456"
+        }
+        create("release") {
+            storeFile =
+                file("/Users/wangzijing/StudioProjects/samples/GradlePluginDemo/app/test.keystore")
+            keyAlias = "test"
+            storePassword = "123456"
+            keyPassword = "123456"
+        }
+    }
     compileSdkVersion(29)
     buildToolsVersion("29.0.2")
 
