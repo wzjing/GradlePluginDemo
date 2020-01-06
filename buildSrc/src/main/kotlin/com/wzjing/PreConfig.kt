@@ -1,6 +1,11 @@
 package com.wzjing
 
+import com.android.build.VariantOutput
+import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
+import com.android.build.gradle.api.ApkVariant
+import com.android.build.gradle.api.ApplicationVariant
+import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -37,7 +42,7 @@ open class PreConfigPluginExtension(objects: ObjectFactory) {
     val configFile: Property<File> = objects.property()
 }
 
-open class ConfigTask @Inject constructor(objects: ObjectFactory): DefaultTask() {
+open class ConfigTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
     @Input
     val configFileProp: RegularFileProperty = objects.fileProperty()
 
@@ -49,10 +54,11 @@ open class ConfigTask @Inject constructor(objects: ObjectFactory): DefaultTask()
                 is AppPlugin -> {
                     val configFile = configFileProp.orNull?.asFile
                     if (configFile == null) {
-                        println("PreConfig Config File not set, please add config to you gradle build file")
+                        println("$TAG : Config File not set, please add config to you gradle build file")
                         return@forEach
-                    } else if(!configFile.exists()) {
-                        println("PreConfig Config File not exits ${configFile.absolutePath}")
+                    } else if (!configFile.exists()) {
+                        println("$TAG : Config File not exits ${configFile.absolutePath}")
+                        return@forEach
                     }
                     val config: Configuration
                     try {
@@ -106,10 +112,53 @@ open class ConfigTask @Inject constructor(objects: ObjectFactory): DefaultTask()
 class PreConfigPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         println("Plugin : $TAG")
-        val extension = target.extensions.create("preconfig", PreConfigPluginExtension::class.java, target.objects)
-        val preConfig = target.tasks.register("preConfig", ConfigTask::class.java) {
-            configFileProp.set(extension.configFile.orNull)
+        val extension = target.extensions.create(
+            "preconfig",
+            PreConfigPluginExtension::class.java,
+            target.objects
+        )
+
+        val appExtension = target.extensions.findByName("android") as? AppExtension
+        appExtension?.productFlavors?.forEach {
+            println("$TAG : production flavor ${it.name}")
         }
-        target.tasks.findByName("preBuild")?.dependsOn(preConfig)
+
+        println("$TAG : appExtension ${appExtension == null}")
+
+        appExtension?.apply {
+            defaultConfig {
+                versionName = "9.9.9"
+            }
+
+            buildTypes {
+                getByName("debug") {
+                    println("$TAG : variants count ${applicationVariants.size}")
+                    applicationVariants.all {
+                        val variant = this
+                        variant.outputs.all {
+                            val output = this
+                            (output as BaseVariantOutputImpl).apply {
+
+                                println("""
+                                    buildType: ${variant.buildType.name}
+                                    flavorName: ${variant.flavorName}
+                                    versionName: ${variant.versionName}
+                                """.trimIndent())
+                                val apkName =
+                                    "$outputFileName-${variant.buildType}-${variant.flavorName}-${variant.versionName}.apk"
+                                println("$TAG : setting apk name to $apkName")
+                                outputFileName = apkName
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+//        val preConfig = target.tasks.register("preConfig", ConfigTask::class.java) {
+//            configFileProp.set(extension.configFile.orNull)
+//        }
+//        target.tasks.findByName("preBuild")?.dependsOn(preConfig)
     }
 }

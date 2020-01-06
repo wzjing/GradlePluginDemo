@@ -36,6 +36,7 @@ android {
         targetSdkVersion(29)
         versionCode = 1
         versionName = "1.0"
+        versionNameSuffix = FlavorConfig.codeTag
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -47,6 +48,22 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 file("proguard-rules.pro")
             )
+        }
+
+    }
+
+    flavorDimensions("usage")
+
+    productFlavors {
+        create("dev") {
+            versionCode = 999
+            versionName = "9.9.9"
+        }
+
+        create("canary") {
+        }
+
+        create("publish") {
         }
     }
 
